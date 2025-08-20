@@ -218,12 +218,7 @@
                 <version>${ruoyi.version}</version>
             </dependency>
 
-            <!-- 健康体检模块 -->
-            <dependency>
-                <groupId>com.ruoyi</groupId>
-                <artifactId>ruoyi-health</artifactId>
-                <version>${ruoyi.version}</version>
-            </dependency>
+
 
         </dependencies>
     </dependencyManagement>
@@ -235,7 +230,6 @@
         <module>ruoyi-quartz</module>
         <module>ruoyi-generator</module>
         <module>ruoyi-common</module>
-        <module>ruoyi-health</module>
     </modules>
     <packaging>pom</packaging>
 

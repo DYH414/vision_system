@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.visionrecord.mapper.VisionRecordMapper">
+    
+    <resultMap type="VisionRecord" id="VisionRecordResult">
+        <result property="id"    column="id"    />
+        <result property="personId"    column="person_id"    />
+        <result property="checkDate"    column="check_date"    />
+        <result property="year"    column="year"    />
+        <result property="leftEye"    column="left_eye"    />
+        <result property="rightEye"    column="right_eye"    />
+        <result property="diagnosis"    column="diagnosis"    />
+        <result property="remark"    column="remark"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateTime"    column="update_time"    />
+    </resultMap>
+
+    <sql id="selectVisionRecordVo">
+        select id, person_id, check_date, year, left_eye, right_eye, diagnosis, remark, create_time, update_time from vision_record
+    </sql>
+
+    <select id="selectVisionRecordList" parameterType="VisionRecord" resultMap="VisionRecordResult">
+        <include refid="selectVisionRecordVo"/>
+        <where>  
+            <if test="personId != null "> and person_id = #{personId}</if>
+            <if test="checkDate != null "> and check_date = #{checkDate}</if>
+            <if test="year != null "> and year = #{year}</if>
+            <if test="diagnosis != null  and diagnosis != ''"> and diagnosis = #{diagnosis}</if>
+            <if test="createTime != null "> and create_time = #{createTime}</if>
+            <if test="updateTime != null "> and update_time = #{updateTime}</if>
+        </where>
+    </select>
+    
+    <select id="selectVisionRecordById" parameterType="Long" resultMap="VisionRecordResult">
+        <include refid="selectVisionRecordVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertVisionRecord" parameterType="VisionRecord" useGeneratedKeys="true" keyProperty="id">
+        insert into vision_record
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="personId != null">person_id,</if>
+            <if test="checkDate != null">check_date,</if>
+            <if test="year != null">year,</if>
+            <if test="leftEye != null">left_eye,</if>
+            <if test="rightEye != null">right_eye,</if>
+            <if test="diagnosis != null">diagnosis,</if>
+            <if test="remark != null">remark,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateTime != null">update_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="personId != null">#{personId},</if>
+            <if test="checkDate != null">#{checkDate},</if>
+            <if test="year != null">#{year},</if>
+            <if test="leftEye != null">#{leftEye},</if>
+            <if test="rightEye != null">#{rightEye},</if>
+            <if test="diagnosis != null">#{diagnosis},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updateVisionRecord" parameterType="VisionRecord">
+        update vision_record
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="personId != null">person_id = #{personId},</if>
+            <if test="checkDate != null">check_date = #{checkDate},</if>
+            <if test="year != null">year = #{year},</if>
+            <if test="leftEye != null">left_eye = #{leftEye},</if>
+            <if test="rightEye != null">right_eye = #{rightEye},</if>
+            <if test="diagnosis != null">diagnosis = #{diagnosis},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteVisionRecordById" parameterType="Long">
+        delete from vision_record where id = #{id}
+    </delete>
+
+    <delete id="deleteVisionRecordByIds" parameterType="String">
+        delete from vision_record where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>
