@@ -1,13 +1,15 @@
 <template>
   <div class="app-container">
     <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="68px">
-      <el-form-item label="人员ID" prop="personId">
-        <el-input
-          v-model="queryParams.personId"
-          placeholder="请输入人员ID"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
+      <el-form-item label="人员" prop="personId">
+        <el-select v-model="queryParams.personId" placeholder="请选择人员" clearable filterable>
+          <el-option
+            v-for="item in personOptions"
+            :key="item.id"
+            :label="item.name"
+            :value="item.id"
+          ></el-option>
+        </el-select>
       </el-form-item>
       <el-form-item label="检测日期" prop="checkDate">
         <el-date-picker clearable
@@ -104,14 +106,14 @@
     <el-table v-loading="loading" :data="visonrecordList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
       <el-table-column label="记录ID" align="center" prop="id" />
-      <el-table-column label="人员ID" align="center" prop="personId" />
+      <el-table-column label="人员姓名" align="center" prop="personName" :formatter="personNameFormat" />
       <el-table-column label="检测日期" align="center" prop="checkDate" width="180">
         <template slot-scope="scope">
           <span>{{ parseTime(scope.row.checkDate, '{y}-{m}-{d}') }}</span>
         </template>
       </el-table-column>
       <el-table-column label="年度" align="center" prop="year" />
-      <el-table-column label="左眼视力(小数制0.1-2.0建议)" align="center" prop="leftEye" />
+      <el-table-column label="左眼视力" align="center" prop="leftEye" />
       <el-table-column label="右眼视力" align="center" prop="rightEye" />
       <el-table-column label="诊断" align="center" prop="diagnosis">
         <template slot-scope="scope">
@@ -160,8 +162,15 @@
     <!-- 添加或修改视力监测记录对话框 -->
     <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
       <el-form ref="form" :model="form" :rules="rules" label-width="80px">
-        <el-form-item label="人员ID" prop="personId">
-          <el-input v-model="form.personId" placeholder="请输入人员ID" />
+        <el-form-item label="人员" prop="personId">
+          <el-select v-model="form.personId" placeholder="请选择人员" filterable>
+            <el-option
+              v-for="item in personOptions"
+              :key="item.id"
+              :label="item.name"
+              :value="item.id"
+            ></el-option>
+          </el-select>
         </el-form-item>
         <el-form-item label="检测日期" prop="checkDate">
           <el-date-picker clearable
@@ -174,8 +183,8 @@
         <el-form-item label="年度" prop="year">
           <el-input v-model="form.year" placeholder="请输入年度" />
         </el-form-item>
-        <el-form-item label="左眼视力(小数制0.1-2.0建议)" prop="leftEye">
-          <el-input v-model="form.leftEye" placeholder="请输入左眼视力(小数制0.1-2.0建议)" />
+        <el-form-item label="左眼视力" prop="leftEye">
+          <el-input v-model="form.leftEye" placeholder="请输入左眼视力" />
         </el-form-item>
         <el-form-item label="右眼视力" prop="rightEye">
           <el-input v-model="form.rightEye" placeholder="请输入右眼视力" />
@@ -204,6 +213,7 @@
 
 <script>
 import { listVisonrecord, getVisonrecord, delVisonrecord, addVisonrecord, updateVisonrecord } from "@/api/visionrecord/visonrecord"
+import { listPerson, getPerson } from "@/api/visionrecord/person"
 
 export default {
   name: "Visonrecord",
@@ -224,6 +234,8 @@ export default {
       total: 0,
       // 视力监测记录表格数据
       visonrecordList: [],
+      // 人员列表数据
+      personOptions: [],
       // 弹出层标题
       title: "",
       // 是否显示弹出层
@@ -253,7 +265,7 @@ export default {
           { required: true, message: "年度不能为空", trigger: "blur" }
         ],
         leftEye: [
-          { required: true, message: "左眼视力(小数制0.1-2.0建议)不能为空", trigger: "blur" }
+          { required: true, message: "左眼视力不能为空", trigger: "blur" }
         ],
         rightEye: [
           { required: true, message: "右眼视力不能为空", trigger: "blur" }
@@ -263,6 +275,7 @@ export default {
   },
   created() {
     this.getList()
+    this.getPersonList()
   },
   methods: {
     /** 查询视力监测记录列表 */
@@ -272,6 +285,35 @@ export default {
         this.visonrecordList = response.rows
         this.total = response.total
         this.loading = false
+        // 获取每条记录对应的人员信息
+        this.getPersonNames()
+      })
+    },
+    /** 获取人员列表 */
+    getPersonList() {
+      listPerson().then(response => {
+        this.personOptions = response.rows
+      })
+    },
+    /** 获取人员姓名 */
+    getPersonNames() {
+      // 获取所有记录中的人员ID
+      const personIds = this.visonrecordList.map(item => item.personId)
+      // 去重
+      const uniqueIds = [...new Set(personIds)]
+      // 为每个记录添加personName属性
+      uniqueIds.forEach(id => {
+        if (id) {
+          getPerson(id).then(res => {
+            const personName = res.data.name
+            // 更新所有相同ID的记录
+            this.visonrecordList.forEach(item => {
+              if (item.personId === id) {
+                this.$set(item, 'personName', personName)
+              }
+            })
+          })
+        }
       })
     },
     // 取消按钮
@@ -314,6 +356,10 @@ export default {
     /** 新增按钮操作 */
     handleAdd() {
       this.reset()
+      // 确保已加载人员列表
+      if (this.personOptions.length === 0) {
+        this.getPersonList()
+      }
       this.open = true
       this.title = "添加视力监测记录"
     },
@@ -362,6 +408,10 @@ export default {
       this.download('visionrecord/visonrecord/export', {
         ...this.queryParams
       }, `visonrecord_${new Date().getTime()}.xlsx`)
+    },
+    /** 人员姓名格式化 */
+    personNameFormat(row, column, cellValue) {
+      return cellValue || '--'
     }
   }
 }
