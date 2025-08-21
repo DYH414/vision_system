@@ -90,4 +90,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             #{id}
         </foreach>
     </delete>
+
+    <!-- 根据年份查询视力监测记录 -->
+    <select id="selectVisionRecordsByYear" parameterType="Integer" resultMap="VisionRecordResult">
+        <include refid="selectVisionRecordVo"/>
+        where year = #{year}
+    </select>
 </mapper>

@@ -1,5 +1,6 @@
 import Vue from 'vue'
 import Router from 'vue-router'
+import visionRoutes from './visionRoutes'
 
 Vue.use(Router)
 
@@ -161,7 +162,9 @@ export const dynamicRoutes = [
         meta: { title: '修改生成配置', activeMenu: '/tool/gen' }
       }
     ]
-  }
+  },
+  // 添加视力监测分析系统路由
+  ...visionRoutes
 ]
 
 // 防止连续点击多次路由报错

@@ -9,8 +9,7 @@ import com.ruoyi.visionrecord.domain.VisionRecord;
  * @author dyh
  * @date 2025-08-20
  */
-public interface VisionRecordMapper 
-{
+public interface VisionRecordMapper {
     /**
      * 查询视力监测记录
      * 
@@ -58,4 +57,12 @@ public interface VisionRecordMapper
      * @return 结果
      */
     public int deleteVisionRecordByIds(Long[] ids);
+
+    /**
+     * 根据年份查询视力监测记录
+     * 
+     * @param year 年份
+     * @return 视力监测记录集合
+     */
+    public List<VisionRecord> selectVisionRecordsByYear(Integer year);
 }
