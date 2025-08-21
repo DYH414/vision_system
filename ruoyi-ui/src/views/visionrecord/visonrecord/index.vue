@@ -181,7 +181,14 @@
           <el-input v-model="form.rightEye" placeholder="请输入右眼视力" />
         </el-form-item>
         <el-form-item label="诊断" prop="diagnosis">
-          <el-input v-model="form.diagnosis" placeholder="请输入诊断" />
+          <el-select v-model="form.diagnosis" placeholder="请选择诊断">
+            <el-option
+              v-for="dict in dict.type.VISION_LEVEL"
+              :key="dict.value"
+              :label="dict.label"
+              :value="dict.value"
+            ></el-option>
+          </el-select>
         </el-form-item>
         <el-form-item label="备注" prop="remark">
           <el-input v-model="form.remark" placeholder="请输入备注" />
@@ -200,6 +207,7 @@ import { listVisonrecord, getVisonrecord, delVisonrecord, addVisonrecord, update
 
 export default {
   name: "Visonrecord",
+  dicts: ['VISION_LEVEL'],
   data() {
     return {
       // 遮罩层
