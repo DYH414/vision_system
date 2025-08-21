@@ -9,8 +9,8 @@
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="性别 M/F" prop="gender">
-        <el-select v-model="queryParams.gender" placeholder="请选择性别 M/F" clearable>
+      <el-form-item label="性别" prop="gender">
+        <el-select v-model="queryParams.gender" placeholder="请选择性别" clearable>
           <el-option
             v-for="dict in dict.type.sys_user_sex"
             :key="dict.value"
@@ -39,14 +39,6 @@
         <el-input
           v-model="queryParams.idCard"
           placeholder="请输入身份证号"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="体检编号" prop="checkCode">
-        <el-input
-          v-model="queryParams.checkCode"
-          placeholder="请输入体检编号"
           clearable
           @keyup.enter.native="handleQuery"
         />
@@ -107,7 +99,7 @@
       <el-table-column type="selection" width="55" align="center" />
       <el-table-column label="编号" align="center" prop="id" />
       <el-table-column label="姓名" align="center" prop="name" />
-      <el-table-column label="性别 M/F" align="center" prop="gender">
+      <el-table-column label="性别" align="center" prop="gender">
         <template slot-scope="scope">
           <dict-tag :options="dict.type.sys_user_sex" :value="scope.row.gender"/>
         </template>
@@ -119,7 +111,6 @@
       </el-table-column>
       <el-table-column label="联系方式" align="center" prop="phone" />
       <el-table-column label="身份证号" align="center" prop="idCard" />
-      <el-table-column label="体检编号" align="center" prop="checkCode" />
       <el-table-column label="创建时间" align="center" prop="createTime" width="180">
         <template slot-scope="scope">
           <span>{{ parseTime(scope.row.createTime, '{y}-{m}-{d}') }}</span>
@@ -164,7 +155,7 @@
         <el-form-item label="姓名" prop="name">
           <el-input v-model="form.name" placeholder="请输入姓名" />
         </el-form-item>
-        <el-form-item label="性别 M/F" prop="gender">
+        <el-form-item label="性别" prop="gender">
           <el-radio-group v-model="form.gender">
             <el-radio
               v-for="dict in dict.type.sys_user_sex"
@@ -186,9 +177,6 @@
         </el-form-item>
         <el-form-item label="身份证号" prop="idCard">
           <el-input v-model="form.idCard" placeholder="请输入身份证号" />
-        </el-form-item>
-        <el-form-item label="体检编号" prop="checkCode">
-          <el-input v-model="form.checkCode" placeholder="请输入体检编号" />
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -234,7 +222,6 @@ export default {
         birthDate: null,
         phone: null,
         idCard: null,
-        checkCode: null,
       },
       // 表单参数
       form: {},
@@ -244,7 +231,7 @@ export default {
           { required: true, message: "姓名不能为空", trigger: "blur" }
         ],
         gender: [
-          { required: true, message: "性别 M/F不能为空", trigger: "change" }
+          { required: true, message: "性别不能为空", trigger: "change" }
         ],
       }
     }
@@ -276,7 +263,6 @@ export default {
         birthDate: null,
         phone: null,
         idCard: null,
-        checkCode: null,
         createTime: null,
         updateTime: null
       }
