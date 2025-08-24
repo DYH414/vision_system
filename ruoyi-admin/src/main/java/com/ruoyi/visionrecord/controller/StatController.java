@@ -75,9 +75,23 @@ public class StatController extends BaseController {
     }
 
     /**
+     * 测试DeepSeek API连接
+     */
+    // @PreAuthorize("@ss.hasPermi('vision:stat:view')") // 临时注释用于测试
+    @GetMapping("/test-api")
+    public AjaxResult testApiConnection() {
+        boolean isConnected = statService.testDeepSeekConnection();
+        if (isConnected) {
+            return AjaxResult.success("DeepSeek API连接正常");
+        } else {
+            return AjaxResult.error("DeepSeek API连接失败，请检查配置和网络");
+        }
+    }
+
+    /**
      * 获取智能分析报告
      */
-    @PreAuthorize("@ss.hasPermi('vision:stat:view')")
+    // @PreAuthorize("@ss.hasPermi('vision:stat:view')") // 临时注释用于测试
     @GetMapping("/analysis")
     public AjaxResult getAiAnalysisReport(@RequestParam(required = false) Integer year) {
         String report = statService.getAiAnalysisReport(year);

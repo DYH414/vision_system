@@ -28,6 +28,7 @@ import com.ruoyi.visionrecord.domain.vo.StatVO;
 import com.ruoyi.visionrecord.mapper.PersonMapper;
 import com.ruoyi.visionrecord.mapper.VisionRecordMapper;
 import com.ruoyi.visionrecord.service.IStatService;
+import com.ruoyi.visionrecord.service.IDeepSeekService;
 
 /**
  * 视力统计分析服务实现
@@ -45,6 +46,9 @@ public class StatServiceImpl implements IStatService {
 
     @Autowired
     private RestTemplate restTemplate;
+
+    @Autowired
+    private IDeepSeekService deepSeekService;
 
     /**
      * 视力等级阈值
@@ -244,6 +248,11 @@ public class StatServiceImpl implements IStatService {
      * 获取智能分析报告
      */
     @Override
+    public boolean testDeepSeekConnection() {
+        return deepSeekService.checkApiConnection();
+    }
+
+    @Override
     public String getAiAnalysisReport(Integer year) {
         if (year == null) {
             year = Calendar.getInstance().get(Calendar.YEAR);
@@ -309,33 +318,15 @@ public class StatServiceImpl implements IStatService {
             prompt.append("视力正常率：").append(vo.getNormalRate().multiply(new BigDecimal(100))).append("%\n");
         }
 
-        // 调用DeepSeek AI API
+        // 调用DeepSeek AI服务生成分析报告
         try {
-            String apiKey = "sk-c886ebdb5b31430a894517d4687239b5";
-            String apiUrl = "https://api.deepseek.com/v1/chat/completions";
-
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
-            headers.set("Authorization", "Bearer " + apiKey);
-
-            String requestBody = "{\"model\":\"deepseek-chat\",\"messages\":[{\"role\":\"user\",\"content\":\""
-                    + prompt.toString().replace("\"", "\\\"").replace("\n", "\\n")
-                    + "\"}]}";
-
-            HttpEntity<String> entity = new HttpEntity<>(requestBody, headers);
-
-            // 发送请求并获取响应
-            String response = restTemplate.postForObject(apiUrl, entity, String.class);
-
-            // 解析响应获取生成的报告内容
-            // 这里简化处理，实际应该解析JSON
-            if (response != null && response.contains("content")) {
-                return response.split("\"content\":\"")[1].split("\"")[0];
-            } else {
-                return "无法生成智能分析报告，请稍后再试。";
-            }
+            return deepSeekService.generateAnalysisReport(prompt.toString());
         } catch (Exception e) {
-            return "生成智能分析报告失败：" + e.getMessage();
+            // 记录错误日志
+            System.err.println("AI分析报告生成失败: " + e.getMessage());
+
+            // 提供降级处理 - 生成基本分析报告
+            return generateFallbackReport(currentYearStat, lastYearStat, year);
         }
     }
 
@@ -426,5 +417,75 @@ public class StatServiceImpl implements IStatService {
         }
 
         return age;
+    }
+
+    /**
+     * 生成降级分析报告
+     * 
+     * @param currentYearStat 当前年度统计数据
+     * @param lastYearStat    上一年度统计数据
+     * @param year            年份
+     * @return 基本分析报告
+     */
+    private String generateFallbackReport(StatVO currentYearStat, StatVO lastYearStat, Integer year) {
+        StringBuilder report = new StringBuilder();
+
+        report.append("# ").append(year).append("年度视力健康分析报告\n\n");
+
+        // 基本统计信息
+        report.append("## 基本统计信息\n");
+        report.append("- 总检测人数：").append(currentYearStat.getTotal()).append("人\n");
+        report.append("- 左眼平均视力：").append(currentYearStat.getAvgLeft()).append("\n");
+        report.append("- 右眼平均视力：").append(currentYearStat.getAvgRight()).append("\n");
+        report.append("- 视力正常率：").append(currentYearStat.getNormalRate().multiply(new BigDecimal(100))).append("%\n");
+        report.append("- 近视率：").append(currentYearStat.getMyopiaRate().multiply(new BigDecimal(100))).append("%\n\n");
+
+        // 年度对比分析
+        if (lastYearStat.getTotal() > 0) {
+            report.append("## 年度对比分析\n");
+
+            BigDecimal normalRateChange = currentYearStat.getNormalRate().subtract(lastYearStat.getNormalRate());
+            BigDecimal myopiaRateChange = currentYearStat.getMyopiaRate().subtract(lastYearStat.getMyopiaRate());
+
+            if (normalRateChange.compareTo(BigDecimal.ZERO) > 0) {
+                report.append("- 视力正常率较去年提升了").append(normalRateChange.multiply(new BigDecimal(100))).append("个百分点\n");
+            } else if (normalRateChange.compareTo(BigDecimal.ZERO) < 0) {
+                report.append("- 视力正常率较去年下降了").append(normalRateChange.abs().multiply(new BigDecimal(100)))
+                        .append("个百分点\n");
+            } else {
+                report.append("- 视力正常率与去年基本持平\n");
+            }
+
+            if (myopiaRateChange.compareTo(BigDecimal.ZERO) > 0) {
+                report.append("- 近视率较去年上升了").append(myopiaRateChange.multiply(new BigDecimal(100))).append("个百分点\n");
+            } else if (myopiaRateChange.compareTo(BigDecimal.ZERO) < 0) {
+                report.append("- 近视率较去年下降了").append(myopiaRateChange.abs().multiply(new BigDecimal(100)))
+                        .append("个百分点\n");
+            } else {
+                report.append("- 近视率与去年基本持平\n");
+            }
+            report.append("\n");
+        }
+
+        // 健康建议
+        report.append("## 健康建议\n");
+
+        BigDecimal myopiaRate = currentYearStat.getMyopiaRate();
+        if (myopiaRate.compareTo(new BigDecimal("0.5")) >= 0) {
+            report.append("- 近视率较高，建议加强视力保护宣传教育\n");
+            report.append("- 定期开展眼保健操和户外活动\n");
+            report.append("- 控制用眼时间，避免长时间近距离用眼\n");
+        } else if (myopiaRate.compareTo(new BigDecimal("0.3")) >= 0) {
+            report.append("- 近视率处于中等水平，需要重点关注\n");
+            report.append("- 建议定期进行视力检查\n");
+            report.append("- 保持良好的用眼习惯\n");
+        } else {
+            report.append("- 视力健康状况良好，继续保持\n");
+            report.append("- 建议继续加强视力保护意识\n");
+        }
+
+        report.append("\n*注：由于AI服务暂时不可用，此报告为基于数据的基本分析。*");
+
+        return report.toString();
     }
 }

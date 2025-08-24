@@ -127,3 +127,30 @@ xss:
   excludes: /system/notice
   # 匹配链接
   urlPatterns: /system/*,/monitor/*,/tool/*,/health/*
+
+# DeepSeek AI配置
+deepseek:
+  # API密钥
+  api-key: sk-631e3ce29b9546a5960150ed166d6cbe
+  # API端点
+  base-url: https://api.deepseek.com/v1
+  # 模型名称
+  model: deepseek-chat
+  # 连接超时时间(毫秒)
+  connect-timeout: 15000
+  # 读取超时时间(毫秒)
+  read-timeout: 90000
+  # 最大token数
+  max-tokens: 2000
+  # 温度参数
+  temperature: 0.7
+  # 重试次数
+  max-retry: 3
+  # 重试延迟(毫秒)
+  retry-delay: 2000
+  # 启用指数退避重试
+  retry-backoff: true
+  # 代理配置
+  proxy-enabled: false
+  proxy-host: ""
+  proxy-port: 8080

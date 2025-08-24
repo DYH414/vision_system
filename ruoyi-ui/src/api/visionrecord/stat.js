@@ -41,7 +41,8 @@ export function getAiAnalysisReport(year) {
     return request({
         url: '/visionrecord/stat/analysis',
         method: 'get',
-        params: { year }
+        params: { year },
+        timeout: 120000 // 专门为AI接口设置120秒超时
     })
 }
 

@@ -46,6 +46,13 @@ public interface IStatService {
     public List<AgeGroupCompareVO> getAgeGroupCompareStat(Integer year);
 
     /**
+     * 测试DeepSeek API连接
+     * 
+     * @return 连接是否成功
+     */
+    public boolean testDeepSeekConnection();
+
+    /**
      * 获取智能分析报告
      * 
      * @param year 年度
