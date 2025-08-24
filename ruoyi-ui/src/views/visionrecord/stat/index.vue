@@ -105,16 +105,6 @@
       </div>
     </el-card>
 
-    <el-card class="box-card" style="margin-top: 20px;">
-      <div slot="header" class="clearfix">
-        <span>数据导出</span>
-      </div>
-      <div class="export-btns">
-        <el-button type="primary" @click="exportExcel">导出Excel统计结果</el-button>
-        <el-button type="success" @click="exportPdf">导出PDF图表</el-button>
-      </div>
-    </el-card>
-
     <!-- 设置年份范围对话框 -->
     <el-dialog title="设置年份范围" :visible.sync="yearRangeDialogVisible" width="30%">
       <el-form :model="trendYearRange" label-width="80px">
@@ -304,26 +294,26 @@ export default {
     // 初始化视力分布图表
     initDistributionChart() {
       if (!this.annualStat) return;
-      
+
       const chartDom = document.getElementById('distribution-chart');
       if (!chartDom) return;
-      
+
       this.distributionChart = echarts.init(chartDom);
-      
+
       const data = [
         { name: '正常', value: this.annualStat.normalRate || 0 },
         { name: '轻度', value: this.annualStat.mildRate || 0 },
         { name: '中度', value: this.annualStat.moderateRate || 0 },
         { name: '重度', value: this.annualStat.highRate || 0 }
       ];
-      
+
       // 转换为百分比
       data.forEach(item => {
         item.value = parseFloat((item.value * 100).toFixed(2));
       });
-      
+
       let option;
-      
+
       if (this.chartType === 'pie') {
         option = {
           title: {
@@ -411,24 +401,24 @@ export default {
           ]
         };
       }
-      
+
       this.distributionChart.setOption(option);
     },
     // 初始化趋势图表
     initTrendChart() {
       if (!this.trendData || this.trendData.length === 0) return;
-      
+
       const chartDom = document.getElementById('trend-chart');
       if (!chartDom) return;
-      
+
       this.trendChart = echarts.init(chartDom);
-      
+
       const years = this.trendData.map(item => item.year);
       const avgLeftData = this.trendData.map(item => parseFloat(item.avgLeft).toFixed(2));
       const avgRightData = this.trendData.map(item => parseFloat(item.avgRight).toFixed(2));
       const normalRateData = this.trendData.map(item => parseFloat((item.normalRate * 100).toFixed(2)));
       const myopiaRateData = this.trendData.map(item => parseFloat((item.myopiaRate * 100).toFixed(2)));
-      
+
       const option = {
         title: {
           text: '年度视力趋势对比',
@@ -513,24 +503,24 @@ export default {
           }
         ]
       };
-      
+
       this.trendChart.setOption(option);
     },
     // 初始化性别对比图表
     initGenderChart() {
       if (!this.genderData || this.genderData.length === 0) return;
-      
+
       const chartDom = document.getElementById('gender-chart');
       if (!chartDom) return;
-      
+
       this.genderChart = echarts.init(chartDom);
-      
+
       const genderLabels = this.genderData.map(item => item.gender === 'M' ? '男' : item.gender === 'F' ? '女' : item.gender);
       const normalRateData = this.genderData.map(item => parseFloat((item.normalRate * 100).toFixed(2)));
       const mildRateData = this.genderData.map(item => parseFloat((item.mildRate * 100).toFixed(2)));
       const moderateRateData = this.genderData.map(item => parseFloat((item.moderateRate * 100).toFixed(2)));
       const highRateData = this.genderData.map(item => parseFloat((item.highRate * 100).toFixed(2)));
-      
+
       const option = {
         title: {
           text: `${this.queryParams.year}年性别视力对比`,
@@ -620,24 +610,24 @@ export default {
           }
         ]
       };
-      
+
       this.genderChart.setOption(option);
     },
     // 初始化年龄段对比图表
     initAgeChart() {
       if (!this.ageGroupData || this.ageGroupData.length === 0) return;
-      
+
       const chartDom = document.getElementById('age-chart');
       if (!chartDom) return;
-      
+
       this.ageChart = echarts.init(chartDom);
-      
+
       const ageLabels = this.ageGroupData.map(item => item.ageGroup);
       const normalRateData = this.ageGroupData.map(item => parseFloat((item.normalRate * 100).toFixed(2)));
       const mildRateData = this.ageGroupData.map(item => parseFloat((item.mildRate * 100).toFixed(2)));
       const moderateRateData = this.ageGroupData.map(item => parseFloat((item.moderateRate * 100).toFixed(2)));
       const highRateData = this.ageGroupData.map(item => parseFloat((item.highRate * 100).toFixed(2)));
-      
+
       const option = {
         title: {
           text: `${this.queryParams.year}年年龄段视力对比`,
@@ -727,7 +717,7 @@ export default {
           }
         ]
       };
-      
+
       this.ageChart.setOption(option);
     },
     // 处理年份变化
@@ -759,7 +749,7 @@ export default {
     // 格式化AI报告（将Markdown格式转换为HTML）
     formatAiReport(report) {
       if (!report) return '';
-      
+
       // 将Markdown标题转换为HTML标题
       let formattedReport = report
         // 处理一级标题 # 标题
@@ -784,7 +774,7 @@ export default {
         .replace(/^(?!<[hou][1-6l]|<li|<ul)(.+)$/gm, '<p style="margin: 8px 0; line-height: 1.6; color: #606266;">$1</p>')
         // 最后将换行符转换为空格（因为已经用p标签处理了段落）
         .replace(/\n/g, ' ');
-      
+
       return formattedReport;
     },
     // 调整图表大小
@@ -899,4 +889,4 @@ export default {
   text-align: center;
   padding: 20px 0;
 }
-</style> 
+</style>
