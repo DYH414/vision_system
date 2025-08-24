@@ -756,10 +756,36 @@ export default {
       if (rate === undefined || rate === null) return '0%';
       return (rate * 100).toFixed(2) + '%';
     },
-    // 格式化AI报告（将换行符转换为HTML换行）
+    // 格式化AI报告（将Markdown格式转换为HTML）
     formatAiReport(report) {
       if (!report) return '';
-      return report.replace(/\n/g, '<br>');
+      
+      // 将Markdown标题转换为HTML标题
+      let formattedReport = report
+        // 处理一级标题 # 标题
+        .replace(/^#\s+(.+)$/gm, '<h1 style="color: #303133; font-size: 24px; font-weight: bold; margin: 20px 0 15px 0; border-bottom: 2px solid #409EFF; padding-bottom: 8px;">$1</h1>')
+        // 处理二级标题 ## 标题
+        .replace(/^##\s+(.+)$/gm, '<h2 style="color: #409EFF; font-size: 20px; font-weight: bold; margin: 18px 0 12px 0; border-left: 4px solid #409EFF; padding-left: 12px;">$1</h2>')
+        // 处理三级标题 ### 标题
+        .replace(/^###\s+(.+)$/gm, '<h3 style="color: #67C23A; font-size: 18px; font-weight: bold; margin: 15px 0 10px 0;">$1</h3>')
+        // 处理四级标题 #### 标题
+        .replace(/^####\s+(.+)$/gm, '<h4 style="color: #E6A23C; font-size: 16px; font-weight: bold; margin: 12px 0 8px 0;">$1</h4>')
+        // 处理粗体文本 **文本**
+        .replace(/\*\*(.+?)\*\*/g, '<strong style="font-weight: bold; color: #303133;">$1</strong>')
+        // 处理斜体文本 *文本*
+        .replace(/\*(.+?)\*/g, '<em style="font-style: italic; color: #606266;">$1</em>')
+        // 处理列表项 - 项目
+        .replace(/^-\s+(.+)$/gm, '<li style="margin: 5px 0; padding-left: 20px; position: relative;">$1</li>')
+        // 处理数字列表项 1. 项目
+        .replace(/^\d+\.\s+(.+)$/gm, '<li style="margin: 5px 0; padding-left: 20px; position: relative;">$1</li>')
+        // 将连续的列表项包装在ul标签中
+        .replace(/(<li[^>]*>.*<\/li>)/gs, '<ul style="margin: 10px 0; padding-left: 20px;">$1</ul>')
+        // 处理段落（将连续的非标题、非列表行包装在p标签中）
+        .replace(/^(?!<[hou][1-6l]|<li|<ul)(.+)$/gm, '<p style="margin: 8px 0; line-height: 1.6; color: #606266;">$1</p>')
+        // 最后将换行符转换为空格（因为已经用p标签处理了段落）
+        .replace(/\n/g, ' ');
+      
+      return formattedReport;
     },
     // 调整图表大小
     resizeCharts() {
@@ -797,11 +823,72 @@ export default {
   margin-top: 20px;
 }
 .ai-report {
-  padding: 20px;
+  padding: 30px;
   min-height: 200px;
-  background-color: #f9f9f9;
-  border-radius: 4px;
+  background-color: #ffffff;
+  border-radius: 8px;
   line-height: 1.8;
+  border: 1px solid #e4e7ed;
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+}
+
+.ai-report h1 {
+  color: #303133 !important;
+  font-size: 24px !important;
+  font-weight: bold !important;
+  margin: 20px 0 15px 0 !important;
+  border-bottom: 2px solid #409EFF !important;
+  padding-bottom: 8px !important;
+}
+
+.ai-report h2 {
+  color: #409EFF !important;
+  font-size: 20px !important;
+  font-weight: bold !important;
+  margin: 18px 0 12px 0 !important;
+  border-left: 4px solid #409EFF !important;
+  padding-left: 12px !important;
+}
+
+.ai-report h3 {
+  color: #67C23A !important;
+  font-size: 18px !important;
+  font-weight: bold !important;
+  margin: 15px 0 10px 0 !important;
+}
+
+.ai-report h4 {
+  color: #E6A23C !important;
+  font-size: 16px !important;
+  font-weight: bold !important;
+  margin: 12px 0 8px 0 !important;
+}
+
+.ai-report p {
+  margin: 8px 0 !important;
+  line-height: 1.6 !important;
+  color: #606266 !important;
+}
+
+.ai-report ul {
+  margin: 10px 0 !important;
+  padding-left: 20px !important;
+}
+
+.ai-report li {
+  margin: 5px 0 !important;
+  padding-left: 20px !important;
+  position: relative !important;
+}
+
+.ai-report strong {
+  font-weight: bold !important;
+  color: #303133 !important;
+}
+
+.ai-report em {
+  font-style: italic !important;
+  color: #606266 !important;
 }
 .empty-report {
   text-align: center;
